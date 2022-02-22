@@ -1,5 +1,7 @@
 package com.springboot.example;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -11,10 +13,12 @@ import com.cyberark.annotations.ConjurPropertySource;
 import com.cyberark.conjur.sdk.ApiException;
 
 @SpringBootApplication
-//@ConjurPropertySource({ "jenkins-app/dbUserName", "jenkins-app/web_password" })
+//@ConjurPropertySource(value={"jenkins-app", "jenkins-app"})
 
-@ConjurPropertySource("jenkins-app/dbUserName")
+@ConjurPropertySource("jenkins-app")
 public class ConjurUser implements CommandLineRunner {
+
+	private static Logger logger = LoggerFactory.getLogger(ConjurPropertySource.class);
 
 	@Autowired
 	Environment env;
@@ -22,6 +26,8 @@ public class ConjurUser implements CommandLineRunner {
 	@Value("${secretValue}")
 	String value;
 	
+	@Value("${secretVal}")
+	String pass;
 	
 
 	public static void main(String[] args) throws ApiException {
@@ -33,8 +39,8 @@ public class ConjurUser implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 
-		System.out.println("By Using Standard Spring annotation --> " + value);
-	//	System.out.println("By Using environment value ---> "+env.getProperty("secretValue"));
+		logger.info("By Using Standard Spring annotation --> " + value +" "+pass);
+	//	logger.info("By Using environment value ---> "+env.getProperty("secretValue"));
 
 	}
 
