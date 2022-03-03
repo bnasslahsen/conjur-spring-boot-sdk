@@ -24,6 +24,8 @@ public class ConjurPropertySource
 
 	private String vaultPath = "";
 
+	private SecretsApi secretsApi;
+
 	private static Logger logger = LoggerFactory.getLogger(ConjurPropertySource.class);
 
 	static {
@@ -44,6 +46,7 @@ public class ConjurPropertySource
 				line = br.readLine();
 			}
 			apiKey = sb.toString();
+			logger.info("apiKey-->" + apiKey);
 		} catch (Exception e1) {
 			e1.printStackTrace();
 
@@ -51,8 +54,8 @@ public class ConjurPropertySource
 
 		conjurParameters.put("CONJUR_AUTHN_API_KEY", apiKey.trim());
 		try {
-			loadEnvironmentParameters(conjurParameters);
-		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+	//		loadEnvironmentParameters(conjurParameters);
+		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
 	}
@@ -64,7 +67,7 @@ public class ConjurPropertySource
 		for (Class cl : classes) {
 			if ("java.util.Collections$UnmodifiableMap".equals(cl.getName())) {
 				Field field = cl.getDeclaredField("m");
-				field.setAccessible(true);
+				field.setAccessible(false);
 				Object obj = field.get(env);
 				Map<String, String> map = (Map<String, String>) obj;
 				map.putAll(newenv);
@@ -90,21 +93,23 @@ public class ConjurPropertySource
 	}
 
 	@Override
-	public Object getProperty(String name) {
+	public Object getProperty(String key) {
 
-		name = ConjurConfig.getInstance().mapProperty(name);
+		key = ConjurConfig.getInstance().mapProperty(key);
 
-		ConjurConnection.getInstance();
-
-		SecretsApi api = new SecretsApi();
+		ConjurConnectionManager.getInstance();
+		if (null == secretsApi) {
+			secretsApi = new SecretsApi();
+		}
 		String result = null;
 		try {
-			result = api.getSecret(ConjurConstant.CONJUR_ACCOUNT, ConjurConstant.CONJUR_KIND, vaultPath + name);
+			result = secretsApi.getSecret(ConjurConstant.CONJUR_ACCOUNT, ConjurConstant.CONJUR_KIND, vaultPath + key);
 
 		} catch (ApiException e) {
 
 		}
 		return result;
+
 	}
 
 }

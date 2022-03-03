@@ -12,14 +12,14 @@ public class ConjurRetrieveSecretService {
 
 	private static Logger logger = LoggerFactory.getLogger(ConjurRetrieveSecretService.class);
 
-	@Autowired
-	public SecretsApi api;
+	private SecretsApi secretsApi ;
+	
 
 	public String retriveMultipleSecretsForCustomAnnotation(String[] keys) throws ApiException {
 
 		Object result = null;
 
-		SecretsApi api = new SecretsApi();
+		secretsApi = new SecretsApi();
 		StringBuilder kind = new StringBuilder("");
 		for (int i = 0; i <= keys.length; i++) {
 			if (i < keys.length - 1) {
@@ -28,15 +28,15 @@ public class ConjurRetrieveSecretService {
 				kind.append("" + ConjurConstant.CONJUR_ACCOUNT + ":variable:" + keys[i] + "");
 			}
 		}
-		result = api.getSecrets(new String(kind));
+		result = secretsApi.getSecrets(new String(kind));
 		return result.toString();
 	}
 
 	public String retriveSingleSecretForCustomAnnotation(String key) throws ApiException {
 		String result = null;
-
+		secretsApi = new SecretsApi();
 		try {
-			result = api.getSecret(ConjurConstant.CONJUR_ACCOUNT, ConjurConstant.CONJUR_KIND, key);
+			result = secretsApi.getSecret(ConjurConstant.CONJUR_ACCOUNT, ConjurConstant.CONJUR_KIND, key);
 		} catch (ApiException e) {
 			logger.error(e.getMessage());
 		}

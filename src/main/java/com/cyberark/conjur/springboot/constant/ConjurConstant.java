@@ -9,5 +9,6 @@ public class ConjurConstant {
 	public static final String CONJUR_PROPERTIES = "/conjur.properties";
 
 	public static final String CONJUR_ACCOUNT = System.getenv("CONJUR_ACCOUNT");
+	
 
 }

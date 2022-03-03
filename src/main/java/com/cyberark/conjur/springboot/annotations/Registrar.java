@@ -1,6 +1,7 @@
 package com.cyberark.conjur.springboot.annotations;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -69,11 +70,12 @@ public class Registrar implements ImportBeanDefinitionRegistrar, BeanFactoryPost
 				.getAllAnnotationAttributes(ConjurPropertySource.class.getName(), false);
 
 		// resolve repeatable / container annotations
-		if (attributesCont != null)
+		if (attributesCont != null) {
 			for (Object attribs : attributesCont.get("value")) {
-				for (AnnotationAttributes a : ((AnnotationAttributes[]) attribs)) {
-					makeAndRegisterBean(registry, (String[]) a.get("value"), a.getString("name"));
-				}
+				//for (AnnotationAttributes a : ((AnnotationAttributes[])((Object[])attribs))) {
+					makeAndRegisterBean(registry, (String[]) ((LinkedHashMap<String, Object>) attribs).get("value"), ((AnnotationAttributes) attribs).getString("name"));
+				//}
+			}
 			}
 
 		// resolve single annotations

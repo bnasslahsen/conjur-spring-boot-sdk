@@ -7,20 +7,20 @@ import com.cyberark.conjur.sdk.AccessToken;
 import com.cyberark.conjur.sdk.ApiClient;
 import com.cyberark.conjur.sdk.Configuration;
 
-public class ConjurConnection {
+public final class ConjurConnectionManager {
 
-	private static ConjurConnection conjurConnectionInstance = null;
+	private static ConjurConnectionManager conjurConnectionInstance = null;
 
-	private static Logger logger = LoggerFactory.getLogger(ConjurConnection.class);
+	private static Logger logger = LoggerFactory.getLogger(ConjurConnectionManager.class);
 
 	// For Getting Connection with conjur vault using cyberark sdk
-	private ConjurConnection() {
+	private ConjurConnectionManager() {
 
 		getConnection();
 
 	}
 
-	private void getConnection() {
+	private void getConnection() { 
 		try {
 			ApiClient client = Configuration.getDefaultApiClient();
 			AccessToken accesToken = client.getNewAccessToken();
@@ -38,11 +38,11 @@ public class ConjurConnection {
 	}
 
 	// Static method to create instance of class and checking for multiple threads
-	public static ConjurConnection getInstance() {
+	public static ConjurConnectionManager getInstance() {
 		if (conjurConnectionInstance == null) {
-			synchronized (ConjurConnection.class) {
+			synchronized (ConjurConnectionManager.class) {
 				if (conjurConnectionInstance == null) {
-					conjurConnectionInstance = new ConjurConnection();
+					conjurConnectionInstance = new ConjurConnectionManager();
 				}
 			}
 		}

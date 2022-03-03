@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ReflectionUtils;
 
 import com.cyberark.conjur.springboot.annotations.ConjurValue;
-import com.cyberark.conjur.springboot.core.env.ConjurConnection;
+import com.cyberark.conjur.springboot.core.env.ConjurConnectionManager;
 import com.cyberark.conjur.springboot.core.env.ConjurPropertySource;
 
 @Configuration
@@ -31,7 +31,7 @@ public class ConjurValueClassProcessor implements BeanPostProcessor {
 	public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
 
 		Class<?> managedBeanClass = bean.getClass();
-		ConjurConnection.getInstance();
+		ConjurConnectionManager.getInstance();
 
 		List<Field> fieldList = FieldUtils.getFieldsListWithAnnotation(managedBeanClass, ConjurValue.class);
 

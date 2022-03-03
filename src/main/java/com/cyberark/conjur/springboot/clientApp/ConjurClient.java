@@ -1,4 +1,6 @@
-package com.cyberark.conjur.springboot;
+package com.cyberark.conjur.springboot.clientApp;
+
+
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,12 +13,12 @@ import com.cyberark.conjur.springboot.annotations.ConjurPropertySource;
 import com.cyberark.conjur.springboot.annotations.ConjurValue;
 
 @SpringBootApplication
-@ConjurPropertySource("jenkinsapp/")
-@ConjurPropertySource("jenkinsapp1/")
-@ConjurPropertySource(value={"jenkinsapp1/", "jenkinsapp2/", "jenkinsapp3/", "jenkinsapp4/"}, name="vault2")//multi vault support to be added later
-public class App implements CommandLineRunner{
+@ConjurPropertySource("jenkinsapp/") 
+//@ConjurPropertySource("jenkinsapp1/")
+//@ConjurPropertySource(value={"jenkinsapp1/", "jenkinsapp2/", "jenkinsapp3/", "jenkinsapp4/"}, name="vault2")//multi vault support to be added later
+public class ConjurClient implements CommandLineRunner{
 	
-	private static Logger logger = LoggerFactory.getLogger(ConjurPropertySource.class);
+	private static Logger logger = LoggerFactory.getLogger(ConjurClient.class);
 
 	
 	@Value("${uid}")
@@ -25,22 +27,22 @@ public class App implements CommandLineRunner{
 	@Value("${password}")
 	private String pass;
 	
-	
-	@Value("${keyVal}")
-	private String keyVal;
-	
+	 
+//	@Value("${keyVal}")
+//	private String keyVal;
+//	
 	@ConjurValue(key="jenkinsapp/dbuserName")
 	private String customVal;
 	
     public static void main(String[] args) {
     	
     	
-        SpringApplication.run(App.class, args);
+        SpringApplication.run(ConjurClient.class, args);
     }
 
 	@Override
 	public void run(String... args) throws Exception {
-		logger.info("By Using Standard Spring annotation --> " + value + " " + pass + "  " + keyVal );
+		logger.info("By Using Standard Spring annotation --> " + value + " " + pass + "  " );
 		logger.info("By Using Custom annotation -->"+customVal);
 
 	}
