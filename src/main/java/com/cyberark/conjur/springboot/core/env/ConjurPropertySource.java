@@ -15,10 +15,17 @@ import com.cyberark.conjur.sdk.ApiException;
 import com.cyberark.conjur.sdk.endpoint.SecretsApi;
 import com.cyberark.conjur.springboot.constant.ConjurConstant;
 
+
+/**
+ * 
+ * This class resolves the secret value for give vault path at application load
+ * time from the conjur vault.
+ *
+ */
 public class ConjurPropertySource
 //extends PropertySource<Object> {
 //consider the following alternative if miss rates are excessive
-		extends EnumerablePropertySource<Object> {
+		extends EnumerablePropertySource<Object>{
 
 	private String vaultInfo = "";
 
@@ -26,17 +33,22 @@ public class ConjurPropertySource
 
 	private SecretsApi secretsApi;
 
+	private static String authTokenFile=System.getenv("CONJUR_AUTHN_TOKEN_FILE");
+	
 	private static Logger logger = LoggerFactory.getLogger(ConjurPropertySource.class);
 
+	/**
+	 * a hack to support seeding environment for the file based api token support in
+	 * downstream java
+	 */
 	static {
 
 		// a hack to support seeding environment for the file based api token support in
 		// downstream java
-
+		if(authTokenFile!=null) {
 		Map<String, String> conjurParameters = new HashMap<String, String>();
-		String apiKey = "";
-
-		try (BufferedReader br = new BufferedReader(new FileReader(System.getenv("CONJUR_AUTHN_TOKEN_FILE")))) {
+		byte[] apiKey = null;
+		try (BufferedReader br = new BufferedReader(new FileReader(authTokenFile))){
 			StringBuilder sb = new StringBuilder();
 			String line = br.readLine();
 
@@ -45,21 +57,41 @@ public class ConjurPropertySource
 				sb.append(System.lineSeparator());
 				line = br.readLine();
 			}
-			apiKey = sb.toString();
-			logger.info("apiKey-->" + apiKey);
+			apiKey =  sb.toString().getBytes();
 		} catch (Exception e1) {
 			e1.printStackTrace();
 
 		}
 
-		conjurParameters.put("CONJUR_AUTHN_API_KEY", apiKey.trim());
+		conjurParameters.put("CONJUR_AUTHN_API_KEY",new String(apiKey).trim());
+		apiKey=null;
 		try {
-	//		loadEnvironmentParameters(conjurParameters);
+		loadEnvironmentParameters(conjurParameters);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
+	
+	}
+	else {
+		 logger.error(ConjurConstant.CONJUR_APIKEY_ERROR);
+
+	}
+		
 	}
 
+	/**
+	 * Sets the external environment variable.
+	 * 
+	 * @param newenv - setting for API_KEY
+	 * @throws NoSuchFieldException     -- class doesn't have a field of a specified
+	 *                                  name
+	 * @throws SecurityException        --indicate a security violation.
+	 * @throws IllegalArgumentException -- a method has been passed an illegal or
+	 *                                  inappropriate argument.
+	 * @throws IllegalAccessException   -- excuting method does not have access to
+	 *                                  the definition of the specified class,
+	 *                                  field, method or constructor.
+	 */
 	public static void loadEnvironmentParameters(Map<String, String> newenv)
 			throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 		Class[] classes = Collections.class.getDeclaredClasses();
@@ -67,10 +99,11 @@ public class ConjurPropertySource
 		for (Class cl : classes) {
 			if ("java.util.Collections$UnmodifiableMap".equals(cl.getName())) {
 				Field field = cl.getDeclaredField("m");
-				field.setAccessible(false);
+				field.setAccessible(true);
 				Object obj = field.get(env);
 				Map<String, String> map = (Map<String, String>) obj;
 				map.putAll(newenv);
+				
 			}
 		}
 	}
@@ -92,6 +125,10 @@ public class ConjurPropertySource
 		return new String[0];
 	}
 
+	/**
+	 * Method which resolves @value annotation queries.
+	 */
+
 	@Override
 	public Object getProperty(String key) {
 
@@ -101,15 +138,13 @@ public class ConjurPropertySource
 		if (null == secretsApi) {
 			secretsApi = new SecretsApi();
 		}
-		String result = null;
+		byte[]result = null;
 		try {
-			result = secretsApi.getSecret(ConjurConstant.CONJUR_ACCOUNT, ConjurConstant.CONJUR_KIND, vaultPath + key);
+			result = secretsApi.getSecret(ConjurConstant.CONJUR_ACCOUNT, ConjurConstant.CONJUR_KIND, vaultPath + key).getBytes();
 
-		} catch (ApiException e) {
-
+		} catch (ApiException ae) {
 		}
 		return result;
-
 	}
-
+	
 }

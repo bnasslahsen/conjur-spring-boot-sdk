@@ -17,7 +17,11 @@ import org.springframework.util.ReflectionUtils;
 import com.cyberark.conjur.springboot.annotations.ConjurValues;
 import com.cyberark.conjur.springboot.core.env.ConjurConnectionManager;
 import com.cyberark.conjur.springboot.core.env.ConjurPropertySource;
-
+/**
+ * 
+ * Custom annotation ConjurValues class processor.
+ *
+ */
 @Configuration
 public class ConjurValuesClassProcessor implements BeanPostProcessor {
 
@@ -39,7 +43,7 @@ public class ConjurValuesClassProcessor implements BeanPostProcessor {
 			if (field.isAnnotationPresent(ConjurValues.class)) {
 				ReflectionUtils.makeAccessible(field);
 				String[] variableId = field.getDeclaredAnnotation(ConjurValues.class).keys();
-				String result = null;
+				byte[] result = null;
 				try {
 					result = conjurRetrieveSecretService.retriveMultipleSecretsForCustomAnnotation(variableId);
 
